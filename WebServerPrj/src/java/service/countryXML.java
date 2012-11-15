@@ -1,4 +1,7 @@
-
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package service;
 
 import java.io.Serializable;
@@ -7,7 +10,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
-@XmlType(name = "country",propOrder={"name","capital","uncode","population","gdptotal","landarea","gdi"})
 public class countryXML {
     @XmlElement(name = "uncode")
     private String unCode;

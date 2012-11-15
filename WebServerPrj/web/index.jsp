@@ -13,6 +13,8 @@
     </head>
     <body>
         <h1>Hello World!</h1>
-         <a href="http://localhost:8080/WebServerPrj/webresources/generic/population">link</a>
+        <a href="http://localhost:8080/WebServerPrj/webresources/generic/countryinfo/china">link1</a>
+        <a href="http://localhost:8080/WebServerPrj/webresources/generic/checkborder/india/china">link2</a>
+        <a href="http://localhost:8080/WebServerPrj/webresources/generic/frompos/20.0/70.0">link3</a>
     </body>
 </html>
