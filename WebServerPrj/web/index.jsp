@@ -12,6 +12,17 @@
         <title>JSP Page</title>
     </head>
     <body>
+        <form name="Test" action="Invoke">
+            <input type="radio" name="aas" value="ass" />
+            <input type="text" name="As" value="" /><select name="">
+                <option></option>
+                <option></option>
+            </select><ol>
+                <li></li>
+                <li></li>
+            </ol>
+
+        </form>
         <h1>Hello World!</h1>
         <a href="http://localhost:8080/WebServerPrj/webresources/generic/countryinfo/chinad">link1</a>
         <a href="http://localhost:8080/WebServerPrj/webresources/generic/checkborder/india/china">link2</a>
