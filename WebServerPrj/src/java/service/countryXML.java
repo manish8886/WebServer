@@ -25,6 +25,16 @@ public class countryXML {
     private String landarea;
     @XmlElement(name = "hdi")
     private String hdi;
+    
+    public countryXML(){
+        unCode = "Not Found";
+        nameEN = "Not Found";
+        nameCapital = "Not Found";
+        population = "Not Found";
+        gdpTotal = "Not Found";
+        landarea = "Not Found";
+        hdi = "Not Found";
+}
     public String getUnCode() {
         return unCode;
     }
