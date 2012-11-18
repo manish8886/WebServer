@@ -242,9 +242,9 @@ public class countriesInfo {
         javax.persistence.criteria.CriteriaQuery<Gdp> cq = cb.createQuery(Gdp.class);
         javax.persistence.criteria.Root<Gdp> mRoot = cq.from(Gdp.class);
         if (asc) {
-            cq = cq.select(mRoot).orderBy(cb.asc(mRoot.<Double>get("GDPTotalInCurrentPrices")));
+            cq = cq.select(mRoot).orderBy(cb.asc(mRoot.<Double>get("gDPTotalInCurrentPrices")));
         } else {
-            cq = cq.select(mRoot).orderBy(cb.desc(mRoot.<Double>get("GDPTotalInCurrentPrices")));
+            cq = cq.select(mRoot).orderBy(cb.desc(mRoot.<Double>get("gDPTotalInCurrentPrices")));
         }
         javax.persistence.Query finalQuery = getEntityManager().createQuery(cq);
         finalQuery.setMaxResults(10);
@@ -282,9 +282,9 @@ public class countriesInfo {
         javax.persistence.criteria.CriteriaQuery<Hdi> cq = cb.createQuery(Hdi.class);
         javax.persistence.criteria.Root<Hdi> mRoot = cq.from(Hdi.class);
         if (asc) {
-            cq = cq.select(mRoot).orderBy(cb.asc(mRoot.<Double>get("Total")));
+            cq = cq.select(mRoot).orderBy(cb.asc(mRoot.<Double>get("total")));
         } else {
-            cq = cq.select(mRoot).orderBy(cb.desc(mRoot.<Double>get("Total")));
+            cq = cq.select(mRoot).orderBy(cb.desc(mRoot.<Double>get("total")));
         }
         javax.persistence.Query finalQuery = getEntityManager().createQuery(cq);
         finalQuery.setMaxResults(10);
