@@ -125,6 +125,14 @@ public class countriesInfo {
         String codeIso3 = GetISO3FrmCoOrdinates(latitude, longitude);
         return GetXMLFromISO3(codeIso3);
     }
+
+    @GET
+    @Path("closestcapitals/{lat}/{lon}")
+    @Produces("application/xml")
+    public List<countryXML> GetClosestCapitalsInfo(@PathParam("lat") double latitude, @PathParam("lon") double longitude) {
+               return GetBorderCountriesFromPosOfaCity(latitude, longitude);
+    }
+
     private String GetISO3FrmCountryName(String name) {
 //        javax.persistence.Query q = getEntityManager().createNamedQuery("Countries.findByNameListEN", Countries.class).setParameter("nameListEN", name);
 //        Countries countryOb = (Countries) q.getSingleResult();
@@ -140,7 +148,27 @@ public class countriesInfo {
         }
 
     }
+    private List<countryXML> GetBorderCountriesFromPosOfaCity(double lat, double lon) {
+        List<countryXML> countries = new ArrayList<countryXML>();
+        try {
+            String codeIS03 = GetISO3FrmCoOrdinates(lat, lon);
+            javax.persistence.Query q = getEntityManager().createNamedQuery("Bordercountries.findByCodeISO3", Bordercountries.class).setParameter("codeISO3", codeIS03);
+            List<Bordercountries> borderCountries = q.getResultList();
+            Iterator<Bordercountries> iter = borderCountries.iterator();
+            while (iter.hasNext()) {
+                Bordercountries country = iter.next();
+                q = getEntityManager().createNamedQuery("Fullcountries.findByCountryName", Fullcountries.class).setParameter("countryName", country.getNameListEN());
+                Fullcountries FullcountryOb1 = (Fullcountries) q.getSingleResult();
+                countryXML xmlOb = GetXMLFromISO3(FullcountryOb1.getIsoAlpha3());
+                countries.add(xmlOb);
+            }
+            return countries;
+        } catch (NoResultException E) {
+            System.out.println("There are no results from the query in Function AreBorderCountries" + E);
+            return countries;
+        }
 
+    }
     private boolean AreBorderCountries(String nameEn1, String nameEn2) {
         //First get code corresponding to the country name from fullCountryTable as user gives smaal names and counntry table has big names
         try {
