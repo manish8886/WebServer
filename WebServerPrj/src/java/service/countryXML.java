@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
 public class countryXML {
+
     @XmlElement(name = "uncode")
     private String unCode;
     @XmlElement(name = "name")
@@ -25,8 +26,8 @@ public class countryXML {
     private String landarea;
     @XmlElement(name = "hdi")
     private String hdi;
-    
-    public countryXML(){
+
+    public countryXML() {
         unCode = "Not Found";
         nameEN = "Not Found";
         nameCapital = "Not Found";
@@ -34,7 +35,8 @@ public class countryXML {
         gdpTotal = "Not Found";
         landarea = "Not Found";
         hdi = "Not Found";
-}
+    }
+
     public String getUnCode() {
         return unCode;
     }
@@ -62,8 +64,14 @@ public class countryXML {
     public String getHDI() {
         return hdi;
     }
-    public countryXML SetUnCode(String Code) {
-        this.unCode = Code;
+
+    public countryXML SetUnCode(Integer Code) {
+        if (Code == null) {
+            this.unCode = "";
+
+        } else {
+            this.unCode = Code.toString();
+        }
         return this;
     }
 
@@ -73,27 +81,53 @@ public class countryXML {
     }
 
     public countryXML SetCapitalName(String nameCapital) {
-        this.nameCapital= nameCapital;
+        this.nameCapital = nameCapital;
         return this;
     }
 
-    public countryXML SetPopulation(String population) {
-        this.population = population;
+    public countryXML SetPopulation(Double population) {
+
+        if (population == null) {
+            this.population = "";
+
+        } else {
+            this.population = population.toString();
+        }
+
         return this;
     }
 
-    public countryXML SetGDP(String gdp) {
-        this.gdpTotal = gdp;
+    public countryXML SetGDP(Double gdp) {
+        if (gdp == null) {
+            this.gdpTotal = "";
+
+        } else {
+            this.gdpTotal = gdp.toString();
+        }
         return this;
     }
 
-    public countryXML SetLandArea(String landArea) {
-        this.landarea = landArea;
+    public countryXML SetLandArea(Double landArea) {
+        if (landArea == null) {
+            this.landarea = "";
+
+        } else {
+            this.landarea = landArea.toString();
+        }
+
         return this;
     }
 
-    public countryXML SetHDI(String HDI) {
-        this.hdi = HDI;
+    public countryXML SetHDI(Double HDI) {
+
+        if (HDI == null) {
+            this.hdi = "";
+
+        } else {
+            this.hdi = HDI.toString();
+        }
+
+
         return this;
     }
 }

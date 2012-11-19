@@ -13,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import database.entity.Bordercountries;
 import database.entity.Coordinates;
+import database.entity.Countries;
 import database.entity.Fullcountries;
 import database.entity.Gdp;
 import database.entity.Hdi;
@@ -130,7 +131,15 @@ public class countriesInfo {
     @Path("closestcapitals/{lat}/{lon}")
     @Produces("application/xml")
     public List<countryXML> GetClosestCapitalsInfo(@PathParam("lat") double latitude, @PathParam("lon") double longitude) {
-               return GetBorderCountriesFromPosOfaCity(latitude, longitude);
+               
+        List<countryXML>list= GetBorderCountriesFromPosOfaCity(latitude, longitude);
+        if(list.isEmpty()){
+            countryXML emptyOb = new countryXML();
+            list.add(emptyOb);
+            return list;
+        }
+    
+        return list;
     }
 
     private String GetISO3FrmCountryName(String name) {
@@ -149,46 +158,67 @@ public class countriesInfo {
 
     }
     private List<countryXML> GetBorderCountriesFromPosOfaCity(double lat, double lon) {
-        List<countryXML> countries = new ArrayList<countryXML>();
+        List<countryXML> countriesXML = new ArrayList<countryXML>();
         try {
             String codeIS03 = GetISO3FrmCoOrdinates(lat, lon);
-            javax.persistence.Query q = getEntityManager().createNamedQuery("Bordercountries.findByCodeISO3", Bordercountries.class).setParameter("codeISO3", codeIS03);
-            List<Bordercountries> borderCountries = q.getResultList();
-            Iterator<Bordercountries> iter = borderCountries.iterator();
+            javax.persistence.Query q = getEntityManager().createNamedQuery("Fullcountries.findByIsoAlpha3", Fullcountries.class).setParameter("isoAlpha3", codeIS03);
+            Fullcountries CountryFull = (Fullcountries)q.getSingleResult();
+            List<Countries>borderCountries= GetListofBorderCountries(CountryFull.getCountryName());
+            Iterator<Countries> iter = borderCountries.iterator();
             while (iter.hasNext()) {
-                Bordercountries country = iter.next();
-                q = getEntityManager().createNamedQuery("Fullcountries.findByCountryName", Fullcountries.class).setParameter("countryName", country.getNameListEN());
-                Fullcountries FullcountryOb1 = (Fullcountries) q.getSingleResult();
-                countryXML xmlOb = GetXMLFromISO3(FullcountryOb1.getIsoAlpha3());
-                countries.add(xmlOb);
+                Countries country = iter.next();
+                countryXML xmlOb = GetXMLFromISO3(country.getCodeISO3());
+                countriesXML.add(xmlOb);
             }
-            return countries;
+            return countriesXML;
         } catch (NoResultException E) {
             System.out.println("There are no results from the query in Function AreBorderCountries" + E);
-            return countries;
+            return countriesXML;
         }
 
+    }
+    private List<Countries> GetListofBorderCountries(String nameEn1) {
+        List<Countries>countriesInCountryTbl = new ArrayList<Countries>();
+        try {
+            javax.persistence.Query q = getEntityManager().createNamedQuery("Fullcountries.findByCountryName", Fullcountries.class).setParameter("countryName", nameEn1);
+            Fullcountries FullcountryOb1 = (Fullcountries) q.getSingleResult();
+
+            q = getEntityManager().createNamedQuery("Bordercountries.findByCodeISO3", Bordercountries.class).setParameter("codeISO3", FullcountryOb1.getIsoAlpha3());
+            List<Bordercountries>CountriesInBorderTbl = q.getResultList();
+            
+            Iterator<Bordercountries> iter = CountriesInBorderTbl.iterator();
+            while (iter.hasNext()) {
+                Bordercountries country = iter.next();
+                q = getEntityManager().createNamedQuery("Countries.findByNameListEN", Countries.class).setParameter("nameListEN", country.getNameListEN());
+                Countries CountryOb1 = (Countries) q.getSingleResult();
+                countriesInCountryTbl.add(CountryOb1);
+            }
+            return countriesInCountryTbl;
+           
+        } catch (NoResultException E) {
+            System.out.println("There are no results from the query in Function AreBorderCountries" + E);
+            return countriesInCountryTbl;
+        }
+        
     }
     private boolean AreBorderCountries(String nameEn1, String nameEn2) {
         //First get code corresponding to the country name from fullCountryTable as user gives smaal names and counntry table has big names
         try {
             javax.persistence.Query q = getEntityManager().createNamedQuery("Fullcountries.findByCountryName", Fullcountries.class).setParameter("countryName", nameEn1);
             Fullcountries FullcountryOb1 = (Fullcountries) q.getSingleResult();
+            List<Countries>BorderTonameEn1 = GetListofBorderCountries(nameEn1);
 
             q = getEntityManager().createNamedQuery("Fullcountries.findByCountryName", Fullcountries.class).setParameter("countryName", nameEn2);
             Fullcountries FullcountryOb2 = (Fullcountries) q.getSingleResult();
 
-            q = getEntityManager().createNamedQuery("Bordercountries.findByNameListEN", Bordercountries.class).setParameter("nameListEN", nameEn1);
-            List<Bordercountries> borderCountryOb1 = q.getResultList();
-            Iterator<Bordercountries> iter = borderCountryOb1.iterator();
+            Iterator<Countries> iter = BorderTonameEn1.iterator();
             while (iter.hasNext()) {
-                Bordercountries inBorderTable = (Bordercountries) iter.next();
-                if (inBorderTable.getCodeISO3().equalsIgnoreCase(FullcountryOb2.getIsoAlpha3())) {
+                Countries inCountryTable = (Countries) iter.next();
+                if (inCountryTable.getCodeISO3().equalsIgnoreCase(FullcountryOb2.getIsoAlpha3())) {
                     return true;
                 }
             }
-
-            return false;
+              return false;
         } catch (NoResultException E) {
             System.out.println("There are no results from the query in Function AreBorderCountries" + E);
             return false;
@@ -235,8 +265,8 @@ public class countriesInfo {
             Hdi hdiOb = (Hdi) q.getSingleResult();
 
             countryXML xmlOb = new countryXML();
-            xmlOb = xmlOb.SetUnCode(unCodeOb.getCodeUN().toString()).SetNameEn(fullCountryInfoOb.getCountryName()).SetCapitalName(fullCountryInfoOb.getCapital()).SetPopulation(populationOb.getPopulationTotal().toString());
-            xmlOb.SetGDP(gdpOb.getGDPTotalInCurrentPrices().toString()).SetLandArea(landArea.getLandAreaTotal().toString()).SetHDI(hdiOb.getTotal().toString());
+            xmlOb = xmlOb.SetUnCode(unCodeOb.getCodeUN()).SetNameEn(fullCountryInfoOb.getCountryName()).SetCapitalName(fullCountryInfoOb.getCapital()).SetPopulation(populationOb.getPopulationTotal());
+            xmlOb.SetGDP(gdpOb.getGDPTotalInCurrentPrices()).SetLandArea(landArea.getLandAreaTotal()).SetHDI(hdiOb.getTotal());
             return xmlOb;
         } catch (NoResultException E) {
             System.out.println("There are no results from the query in FUnction GetXMLFromISO3" + E);
