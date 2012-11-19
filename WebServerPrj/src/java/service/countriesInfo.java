@@ -12,6 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import database.entity.Bordercountries;
+import database.entity.Cities;
 import database.entity.Coordinates;
 import database.entity.Countries;
 import database.entity.Fullcountries;
@@ -128,9 +129,9 @@ public class countriesInfo {
     }
 
     @GET
-    @Path("closestcapitals/{lat}/{lon}")
+    @Path("neighbourscapitals/{lat}/{lon}")
     @Produces("application/xml")
-    public List<countryXML> GetClosestCapitalsInfo(@PathParam("lat") double latitude, @PathParam("lon") double longitude) {
+    public List<countryXML> GetNeighbourCapitalsInfo(@PathParam("lat") double latitude, @PathParam("lon") double longitude) {
                
         List<countryXML>list= GetBorderCountriesFromPosOfaCity(latitude, longitude);
         if(list.isEmpty()){
@@ -140,6 +141,12 @@ public class countriesInfo {
         }
     
         return list;
+    }
+     @GET
+    @Path("closestcapital/{lat}/{lon}")
+    @Produces("application/xml")
+    public countryXML GetClosestCapital(@PathParam("lat") double latitude, @PathParam("lon") double longitude) {
+                return findClosestCapital(latitude, longitude);
     }
 
     private String GetISO3FrmCountryName(String name) {
@@ -156,6 +163,36 @@ public class countriesInfo {
             return "";
         }
 
+    }
+    private countryXML findClosestCapital(double lat, double lon){
+        List<Countries> countryList = GetListofBorderCountries(GetISO3FrmCoOrdinates(lat, lon));
+        try {
+            javax.persistence.Query q;
+            double minDist = 0;
+            int index = 0;
+            for (int i = 0; i < countryList.size(); i++) {
+                Countries countryOb = countryList.get(i);
+                q = getEntityManager().createNamedQuery("Fullcountries.findByIsoAlpha3", Fullcountries.class).setParameter("isoAlpha3", countryOb.getCodeISO3());
+                Fullcountries CountryFull = (Fullcountries) q.getSingleResult();
+                q = getEntityManager().createNamedQuery("Cities.findByCapital", Cities.class).setParameter("capital", CountryFull.getCapital());
+                Cities city = (Cities) q.getSingleResult();
+                if (i == 0) {
+                    minDist = distance(lat, lon, city.getLat(), city.getLng(), 'K');
+                } else {
+                    double dist = distance(lat, lon, city.getLat(), city.getLng(), 'K');
+                    if (dist < minDist) {
+                        minDist = dist;
+                        index = i;
+                    }
+                }
+
+            }
+            return GetXMLFromISO3(countryList.get(index).getCodeISO3());
+        } catch (NoResultException E) {
+            countryXML xmlob = new countryXML();
+            System.out.println("There are no results from the query in Function AreBorderCountries" + E);
+            return xmlob;
+        }
     }
     private List<countryXML> GetBorderCountriesFromPosOfaCity(double lat, double lon) {
         List<countryXML> countriesXML = new ArrayList<countryXML>();
@@ -175,7 +212,6 @@ public class countriesInfo {
             System.out.println("There are no results from the query in Function AreBorderCountries" + E);
             return countriesXML;
         }
-
     }
     private List<Countries> GetListofBorderCountries(String nameEn1) {
         List<Countries>countriesInCountryTbl = new ArrayList<Countries>();
@@ -355,5 +391,33 @@ public class countriesInfo {
         }
         return listResult;
     }
+    
+    private double distance(double lat1, double lon1, double lat2, double lon2, char unit) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        if (unit == 'K') {
+            dist = dist * 1.609344;
+        } else if (unit == 'N') {
+            dist = dist * 0.8684;
+        }
+        return (dist);
+    }
+
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+    /*::  This function converts decimal degrees to radians             :*/
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+    /*::  This function converts radians to decimal degrees             :*/
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
+
 }
-  
