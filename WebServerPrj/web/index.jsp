@@ -28,6 +28,7 @@
         <a href="http://localhost:8080/WebServerPrj/webresources/generic/checkborder/india/china">link2</a>
         <a href="http://localhost:8080/WebServerPrj/webresources/generic/frompos/20.0/70.0">link3</a>
         <a href="http://localhost:8080/WebServerPrj/webresources/generic/orderBy/population/0">link4</a>
-        <a href="http://localhost:8080/WebServerPrj/webresources/generic/closestcapitals/20/70">link4</a>
+        <a href="http://localhost:8080/WebServerPrj/webresources/generic/closestcapital/20/70">closest capital</a>
+        <a href="http://localhost:8080/WebServerPrj/webresources/generic/neighbourscapitals/20/70">closest capital</a>
     </body>
 </html>
